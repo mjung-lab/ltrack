@@ -1,0 +1,60 @@
+{
+  "name": "ltrack-backend-complete",
+  "version": "1.0.0",
+  "description": "L-TRACK® Complete Marketing Analytics Platform",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "start:prod": "NODE_ENV=production node dist/app.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:migrate:prod": "npx prisma migrate deploy",
+    "db:generate": "npx prisma generate",
+    "db:deploy": "npx prisma migrate deploy",
+    "db:seed": "ts-node src/seed.ts",
+    "db:push": "npx prisma db push",
+    "build:prod": "tsc && npm run db:generate && npm run db:migrate:prod"
+  },
+  "keywords": [
+    "line",
+    "marketing",
+    "analytics",
+    "tracking"
+  ],
+  "author": "L-TRACK Development Team",
+  "license": "MIT",
+  "dependencies": {
+    "@line/bot-sdk": "^10.2.0",
+    "@prisma/client": "^6.16.2",
+    "@types/ua-parser-js": "^0.7.39",
+    "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "cron": "^4.3.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.6",
+    "pdfkit": "^0.17.2",
+    "prisma": "^6.16.2",
+    "redis": "^5.8.2",
+    "typescript": "^5.9.2",
+    "ua-parser-js": "^2.0.5",
+    "uuid": "^13.0.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.5.2",
+    "@types/nodemailer": "^7.0.1",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2"
+  }
+}

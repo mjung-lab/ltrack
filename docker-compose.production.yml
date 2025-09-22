@@ -1,0 +1,76 @@
+version: '3.8'
+services:
+  # データベース
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ltrack_production
+      POSTGRES_USER: ltrack_user
+      POSTGRES_PASSWORD: ltrack_secure_production_password_2024
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - ltrack-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - ltrack-network
+
+  # バックエンド
+  backend:
+    build: ./backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://ltrack_user:ltrack_secure_production_password_2024@postgres:5432/ltrack_production"
+      REDIS_URL: "redis://redis:6379"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - ltrack-network
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # フロントエンド
+  frontend:
+    build: ./frontend
+    environment:
+      REACT_APP_API_URL: "https://your-domain.com/api"
+      REACT_APP_BASE_URL: "https://your-domain.com"
+    restart: unless-stopped
+    networks:
+      - ltrack-network
+
+  # Nginx
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - ltrack-network
+
+networks:
+  ltrack-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts  Account[]
+}
+
+model Account {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lineAccounts  LineAccount[]
+  trackingCodes TrackingCode[]
+  campaigns     Campaign[]
+}
+
+model LineAccount {
+  id                String   @id @default(uuid())
+  name              String
+  channelId         String   @unique
+  channelSecret     String
+  channelAccessToken String
+  webhookUrl        String?
+  accountId         String
+  account           Account  @relation(fields: [accountId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  trackingCodes TrackingCode[]
+  events        LineEvent[]
+}
+
+model TrackingCode {
+  id            String      @id @default(uuid())
+  name          String
+  code          String      @unique
+  description   String?
+  accountId     String
+  account       Account     @relation(fields: [accountId], references: [id])
+  lineAccountId String
+  lineAccount   LineAccount @relation(fields: [lineAccountId], references: [id])
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  clicks     Click[]
+  friends    Friend[]
+  campaigns  Campaign[]
+  abTests    ABTest[]
+}
+
+model Click {
+  id              String       @id @default(uuid())
+  trackingCodeId  String
+  trackingCode    TrackingCode @relation(fields: [trackingCodeId], references: [id])
+  ipAddress       String?
+  userAgent       String?
+  referer         String?
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  deviceType      String?
+  browser         String?
+  os              String?
+  country         String?
+  city            String?
+  timestamp       DateTime     @default(now())
+}
+
+model Friend {
+  id              String       @id @default(uuid())
+  lineUserId      String       @unique
+  trackingCodeId  String
+  trackingCode    TrackingCode @relation(fields: [trackingCodeId], references: [id])
+  displayName     String?
+  pictureUrl      String?
+  statusMessage   String?
+  addedAt         DateTime     @default(now())
+
+  events      LineEvent[]
+  conversions Conversion[]
+}
+
+model LineEvent {
+  id            String      @id @default(uuid())
+  lineAccountId String
+  lineAccount   LineAccount @relation(fields: [lineAccountId], references: [id])
+  friendId      String?
+  friend        Friend?     @relation(fields: [friendId], references: [id])
+  eventType     String
+  eventData     Json
+  timestamp     DateTime    @default(now())
+}
+
+model Conversion {
+  id         String   @id @default(uuid())
+  friendId   String
+  friend     Friend   @relation(fields: [friendId], references: [id])
+  eventType  String
+  value      Float?
+  currency   String?
+  timestamp  DateTime @default(now())
+}
+
+model Campaign {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+  platform        String
+  campaignId      String
+  accountId       String
+  account         Account      @relation(fields: [accountId], references: [id])
+  trackingCodeId  String
+  trackingCode    TrackingCode @relation(fields: [trackingCodeId], references: [id])
+  startDate       DateTime
+  endDate         DateTime?
+  budget          Float?
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  metrics CampaignMetric[]
+}
+
+model CampaignMetric {
+  id         String   @id @default(uuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  date       DateTime
+  impressions Int     @default(0)
+  clicks     Int     @default(0)
+  spend      Float   @default(0)
+  cpm        Float?
+  cpc        Float?
+  ctr        Float?
+  createdAt  DateTime @default(now())
+}
+
+model ABTest {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+  trackingCodeId  String
+  trackingCode    TrackingCode @relation(fields: [trackingCodeId], references: [id])
+  controlVariant  String
+  testVariants    Json
+  trafficSplit    Json
+  status          String       @default("draft")
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  results ABTestResult[]
+}
+
+model ABTestResult {
+  id         String   @id @default(uuid())
+  abTestId   String
+  abTest     ABTest   @relation(fields: [abTestId], references: [id])
+  variant    String
+  date       DateTime
+  visitors   Int      @default(0)
+  conversions Int     @default(0)
+  conversionRate Float @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model Segment {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String
+  criteria    Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Alert {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String
+  condition   Json
+  threshold   Float
+  isActive    Boolean  @default(true)
+  severity    String   @default("medium")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  logs AlertLog[]
+}
+
+model AlertLog {
+  id        String   @id @default(uuid())
+  alertId   String
+  alert     Alert    @relation(fields: [alertId], references: [id])
+  triggered Boolean  @default(false)
+  value     Float
+  message   String?
+  timestamp DateTime @default(now())
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String
+  schedule    String
+  recipients  Json
+  lastSent    DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
