@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { logger } from '../app';
+import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 

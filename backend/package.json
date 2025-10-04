@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "dev": "nodemon src/app.ts",
-    "build": "tsc",
+    "build": "npx prisma generate && npx prisma db push && tsc",
     "start": "node dist/app.js",
     "start:prod": "NODE_ENV=production node dist/app.js",
     "db:migrate": "npx prisma migrate dev",
@@ -13,8 +13,7 @@
     "db:generate": "npx prisma generate",
     "db:deploy": "npx prisma migrate deploy",
     "db:seed": "ts-node src/seed.ts",
-    "db:push": "npx prisma db push",
-    "build:prod": "tsc && npm run db:generate && npm run db:migrate:prod"
+    "db:push": "npx prisma db push"
   },
   "keywords": [
     "line",

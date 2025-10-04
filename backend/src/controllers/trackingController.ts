@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from '../app';
+import { logger } from '../utils/logger';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();

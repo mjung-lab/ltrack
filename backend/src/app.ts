@@ -6,22 +6,15 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import path from 'path';
 import fs from 'fs';
+import { authRouter } from './routes/auth';
+import { trackingRouter } from './routes/tracking';
+import { lineRouter } from './routes/line';
+import { webhookRouter } from './routes/webhook';
+import { recordClick } from './controllers/trackingController';
+import { logger } from './utils/logger';
 
 const app = express();
 const prisma = new PrismaClient();
-
-// Logger設定
-export const logger = {
-  info: (message: string, data?: any) => {
-    console.log(`[INFO] ${message}`, data ? JSON.stringify(data, null, 2) : '');
-  },
-  error: (message: string, error?: any) => {
-    console.error(`[ERROR] ${message}`, error);
-  },
-  warn: (message: string, data?: any) => {
-    console.warn(`[WARN] ${message}`, data);
-  }
-};
 
 // ミドルウェア
 app.use(helmet());
@@ -40,12 +33,6 @@ app.use(limiter);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ルート設定
-import { authRouter } from './routes/auth';
-import { trackingRouter } from './routes/tracking';
-import { lineRouter } from './routes/line';
-import { webhookRouter } from './routes/webhook';
-
 // API ルート
 app.use('/api/auth', authRouter);
 app.use('/api/tracking', trackingRouter);
@@ -53,7 +40,6 @@ app.use('/api/line', lineRouter);
 app.use('/webhook', webhookRouter);
 
 // トラッキング用の短縮URL
-import { recordClick } from './controllers/trackingController';
 app.get('/t/:code', recordClick);
 
 // ヘルスチェック

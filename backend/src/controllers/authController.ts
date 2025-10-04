@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { logger } from '../app';
+import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
